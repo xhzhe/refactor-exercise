@@ -2,7 +2,7 @@ const TRAGEDY = 'tragedy';
 
 const COMEDY = 'comedy';
 
-function statement(invoice, plays) {
+function statement(invoice, plays, type = 'default') {
     let totalAmount = 0;
     let volumeCredits = 0;
     let playList = [];
@@ -17,27 +17,7 @@ function statement(invoice, plays) {
         })
         totalAmount += thisAmount;
     }
-    return generateResult(totalAmount, playList, volumeCredits, USDFormat(), invoice.customer);
-}
-
-function generateVolumeCredits(audience, type) {
-    let volumeCredits = 0;
-    // add volume credits
-    volumeCredits += Math.max(audience - 30, 0);
-    // add extra credit for every ten comedy attendees
-    if (COMEDY === type) volumeCredits += Math.floor(audience / 5);
-    return volumeCredits;
-}
-
-function generateResult(totalAmount, playList, volumeCredits, format, nameOfCustomer) {
-    let result = `Statement for ${nameOfCustomer}\n`;
-    for (let play of playList) {
-        //print line for this order
-        result += ` ${play.name}: ${format(play.thisAmount / 100)} (${play.audience} seats)\n`;
-    }
-    result += `Amount owed is ${format(totalAmount / 100)}\n`;
-    result += `You earned ${volumeCredits} credits \n`;
-    return result
+    return generateResult(totalAmount, playList, volumeCredits, USDFormat(), invoice.customer, type);
 }
 
 function generateAmount(audience, type) {
@@ -62,12 +42,53 @@ function generateAmount(audience, type) {
     return thisAmount;
 }
 
+function generateVolumeCredits(audience, type) {
+    let volumeCredits = 0;
+    // add volume credits
+    volumeCredits += Math.max(audience - 30, 0);
+    // add extra credit for every ten comedy attendees
+    if (COMEDY === type) volumeCredits += Math.floor(audience / 5);
+    return volumeCredits;
+}
+
 function USDFormat() {
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
     }).format;
+}
+
+function generateResult(totalAmount, playList, volumeCredits, format, nameOfCustomer, type) {
+    if (type === 'html') {
+        return generateHtmlResult(totalAmount, playList, volumeCredits, format, nameOfCustomer);
+    }
+    return generateDefaultResult(totalAmount, playList, volumeCredits, format, nameOfCustomer);
+}
+
+function generateHtmlResult(totalAmount, playList, volumeCredits, format, nameOfCustomer) {
+    let result = `<h1>Statement for ${nameOfCustomer}</h1>\n` +
+        '<table>\n' +
+        '<tr><th>play</th><th>seats</th><th>cost</th></tr>';
+    for (let play of playList) {
+        //print line for this order
+        result += ` <tr><td>${play.name}</td><td>${play.audience}</td><td>${format(play.thisAmount / 100)}</td></tr>\n`;
+    }
+    result += '</table>\n'
+    result += `<p>Amount owed is <em>${format(totalAmount / 100)}</em></p>\n`;
+    result += `<p>You earned <em>${volumeCredits}</em> credits</p>\n`;
+    return result
+}
+
+function generateDefaultResult(totalAmount, playList, volumeCredits, format, nameOfCustomer) {
+    let result = `Statement for ${nameOfCustomer}\n`;
+    for (let play of playList) {
+        //print line for this order
+        result += ` ${play.name}: ${format(play.thisAmount / 100)} (${play.audience} seats)\n`;
+    }
+    result += `Amount owed is ${format(totalAmount / 100)}\n`;
+    result += `You earned ${volumeCredits} credits \n`;
+    return result
 }
 
 module.exports = {
