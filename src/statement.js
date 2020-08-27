@@ -8,11 +8,8 @@ function statement(invoice, plays) {
     let playList = [];
     for (let perf of invoice.performances) {
         const play = plays[perf.playID];
-        let thisAmount = generateAmount(play.type, perf.audience);
-        // add volume credits
-        volumeCredits += Math.max(perf.audience - 30, 0);
-        // add extra credit for every ten comedy attendees
-        if (COMEDY === play.type) volumeCredits += Math.floor(perf.audience / 5);
+        let thisAmount = generateAmount(perf.audience, play.type);
+        volumeCredits += generateVolumeCredits(perf.audience, play.type);
         playList.push({
             name: play.name,
             thisAmount: thisAmount,
@@ -21,6 +18,15 @@ function statement(invoice, plays) {
         totalAmount += thisAmount;
     }
     return generateResult(totalAmount, playList, volumeCredits, USDFormat(), invoice);
+}
+
+function generateVolumeCredits(audience, type) {
+    let volumeCredits = 0;
+    // add volume credits
+    volumeCredits += Math.max(audience - 30, 0);
+    // add extra credit for every ten comedy attendees
+    if (COMEDY === type) volumeCredits += Math.floor(audience / 5);
+    return volumeCredits;
 }
 
 function generateResult(totalAmount, playList, volumeCredits, format, invoice) {
@@ -34,7 +40,7 @@ function generateResult(totalAmount, playList, volumeCredits, format, invoice) {
     return result
 }
 
-function generateAmount(type, audience) {
+function generateAmount(audience, type) {
     let thisAmount = 0;
     switch (type) {
         case TRAGEDY:
