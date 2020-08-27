@@ -17,7 +17,7 @@ function statement(invoice, plays) {
         })
         totalAmount += thisAmount;
     }
-    return generateResult(totalAmount, playList, volumeCredits, USDFormat(), invoice);
+    return generateResult(totalAmount, playList, volumeCredits, USDFormat(), invoice.customer);
 }
 
 function generateVolumeCredits(audience, type) {
@@ -29,8 +29,8 @@ function generateVolumeCredits(audience, type) {
     return volumeCredits;
 }
 
-function generateResult(totalAmount, playList, volumeCredits, format, invoice) {
-    let result = `Statement for ${invoice.customer}\n`;
+function generateResult(totalAmount, playList, volumeCredits, format, nameOfCustomer) {
+    let result = `Statement for ${nameOfCustomer}\n`;
     for (let play of playList) {
         //print line for this order
         result += ` ${play.name}: ${format(play.thisAmount / 100)} (${play.audience} seats)\n`;
