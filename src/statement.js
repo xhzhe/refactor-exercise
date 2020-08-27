@@ -5,8 +5,7 @@ const COMEDY = 'comedy';
 function statement(invoice, plays) {
     let totalAmount = 0;
     let volumeCredits = 0;
-    let result = `Statement for ${invoice.customer}\n`;
-    const format = USDFormat();
+    let playList = [];
     for (let perf of invoice.performances) {
         const play = plays[perf.playID];
         let thisAmount = generateAmount(play.type, perf.audience);
@@ -14,13 +13,25 @@ function statement(invoice, plays) {
         volumeCredits += Math.max(perf.audience - 30, 0);
         // add extra credit for every ten comedy attendees
         if (COMEDY === play.type) volumeCredits += Math.floor(perf.audience / 5);
-        //print line for this order
-        result += ` ${play.name}: ${format(thisAmount / 100)} (${perf.audience} seats)\n`;
+        playList.push({
+            name: play.name,
+            thisAmount: thisAmount,
+            audience: perf.audience
+        })
         totalAmount += thisAmount;
+    }
+    return generateResult(totalAmount, playList, volumeCredits, USDFormat(), invoice);
+}
+
+function generateResult(totalAmount, playList, volumeCredits, format, invoice) {
+    let result = `Statement for ${invoice.customer}\n`;
+    for (let play of playList) {
+        //print line for this order
+        result += ` ${play.name}: ${format(play.thisAmount / 100)} (${play.audience} seats)\n`;
     }
     result += `Amount owed is ${format(totalAmount / 100)}\n`;
     result += `You earned ${volumeCredits} credits \n`;
-    return result;
+    return result
 }
 
 function generateAmount(type, audience) {
