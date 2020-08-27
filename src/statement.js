@@ -3,6 +3,11 @@ const TRAGEDY = 'tragedy';
 const COMEDY = 'comedy';
 
 function statement(invoice, plays, type = 'default') {
+    const income = countIncome(invoice, plays);
+    return generateResult(income.totalAmount, income.plays, income.volumeCredits, USDFormat(), invoice.customer, type);
+}
+
+function countIncome(invoice, plays) {
     let totalAmount = 0;
     let volumeCredits = 0;
     let playList = [];
@@ -17,7 +22,11 @@ function statement(invoice, plays, type = 'default') {
         })
         totalAmount += thisAmount;
     }
-    return generateResult(totalAmount, playList, volumeCredits, USDFormat(), invoice.customer, type);
+    return {
+        plays: playList,
+        totalAmount: totalAmount,
+        volumeCredits: volumeCredits
+    }
 }
 
 function generateAmount(audience, type) {
